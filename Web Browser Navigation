@@ -1,0 +1,186 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX 100
+
+typedef struct Stack {
+    int top;
+    char* items[MAX];
+} Stack;
+
+void initStack(Stack* stack) {
+    stack->top = -1;
+}
+
+int isEmpty(Stack* stack) {
+    return stack->top == -1;
+}
+
+int isFull(Stack* stack) {
+    return stack->top == MAX - 1;
+}
+
+void push(Stack* stack, char* item) {
+    if (isFull(stack)) {
+        printf("Stack overflow\n");
+        return;
+    }
+    stack->items[++stack->top] = item;
+}
+
+char* pop(Stack* stack) {
+    if (isEmpty(stack)) {
+        printf("Stack underflow\n");
+        return NULL;
+    }
+    return stack->items[stack->top--];
+}
+
+char* peek(Stack* stack) {
+    if (isEmpty(stack)) {
+        return NULL;
+    }
+    return stack->items[stack->top];
+}
+
+typedef struct WebBrowser {
+    Stack backStack;
+    Stack forwardStack;
+    char* currentPage;
+} WebBrowser;
+
+void initWebBrowser(WebBrowser* browser) {
+    initStack(&browser->backStack);
+    initStack(&browser->forwardStack);
+    browser->currentPage = NULL;
+}
+
+void visitPage(WebBrowser* browser, char* page) {
+    if (browser->currentPage != NULL) {
+        push(&browser->backStack, browser->currentPage);
+        initStack(&browser->forwardStack); // Clear the forward stack
+    }
+    browser->currentPage = page;
+    printf("Visited %s\n", page);
+}
+
+void back(WebBrowser* browser) {
+    if (isEmpty(&browser->backStack)) {
+        printf("No pages in back history\n");
+        return;
+    }
+    push(&browser->forwardStack, browser->currentPage);
+    browser->currentPage = pop(&browser->backStack);
+    printf("Back to %s\n", browser->currentPage);
+}
+
+void forward(WebBrowser* browser) {
+    if (isEmpty(&browser->forwardStack)) {
+        printf("No pages in forward history\n");
+        return;
+    }
+    push(&browser->backStack, browser->currentPage);
+    browser->currentPage = pop(&browser->forwardStack);
+    printf("Forward to %s\n", browser->currentPage);
+}
+
+void homeOrLogin(WebBrowser* browser) {
+    visitPage(browser, "Home/Login");
+}
+
+void search(WebBrowser* browser) {
+    char query[50];
+    printf("Enter search query: ");
+    scanf("%s", query);
+    char* page = (char*)malloc(50);
+    sprintf(page, "Search: %s", query);
+    visitPage(browser, page);
+}
+
+void listManager(WebBrowser* browser) {
+    char listName[50];
+    printf("Enter list name: ");
+    scanf("%s", listName);
+    char* page = (char*)malloc(50);
+    sprintf(page, "List Manager: %s", listName);
+    visitPage(browser, page);
+}
+
+void selector(WebBrowser* browser) {
+    char selection[50];
+    printf("Enter selection: ");
+    scanf("%s", selection);
+    char* page = (char*)malloc(50);
+    sprintf(page, "Selector: %s", selection);
+    visitPage(browser, page);
+}
+
+void dataProcessor(WebBrowser* browser) {
+    char data[50];
+    printf("Enter data: ");
+    scanf("%s", data);
+    char* page = (char*)malloc(50);
+    sprintf(page, "Data Processor: %s", data);
+    visitPage(browser, page);
+}
+
+void logout(WebBrowser* browser) {
+    visitPage(browser, "Logout");
+}
+
+int main() {
+    WebBrowser browser;
+    initWebBrowser(&browser);
+
+    int choice;
+    do {
+        printf("\n1. Home/Login\n");
+        printf("2. Search\n");
+        printf("3. List Manager\n");
+        printf("4. Selector\n");
+        printf("5. Data Processor\n");
+        printf("6. Back\n");
+        printf("7. Forward\n");
+        printf("8. Logout\n");
+        printf("0. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                homeOrLogin(&browser);
+                break;
+            case 2:
+                search(&browser);
+                break;
+            case 3:
+                listManager(&browser);
+                break;
+            case 4:
+                selector(&browser);
+                break;
+            case 5:
+                dataProcessor(&browser);
+                break;
+            case 6:
+                back(&browser);
+                break;
+            case 7:
+                forward(&browser);
+                break;
+            case 8:
+                logout(&browser);
+                break;
+            case 0:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice\n");
+        }
+    } while (choice != 0);
+
+    return 0;
+}
+
+
